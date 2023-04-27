@@ -1218,15 +1218,15 @@ function addCoin() {
 }
 
 function addLife() {
-  game.lifes = Math.min(world.maxLifes, game.lifes + 1);
-  ui.updateLifesDisplay();
+  game.lives = Math.min(world.maxLives, game.lives + 1);
+  ui.updateLivesDisplay();
 }
 
 function removeLife() {
-  game.lifes = Math.max(0, game.lifes - 1);
-  ui.updateLifesDisplay();
+  game.lives = Math.max(0, game.lives - 1);
+  ui.updateLivesDisplay();
 
-  game.statistics.lifesLost += 1;
+  game.statistics.livesLost += 1;
 }
 
 //endregion
@@ -1517,7 +1517,7 @@ class UI {
     this._elemReplayMessage = document.getElementById('replayMessage');
     this._elemLevelCounter = document.getElementById('levelValue');
     this._elemLevelCircle = document.getElementById('levelCircleStroke');
-    this._elemsLifes = document.querySelectorAll('#lifes img');
+    this._elemsLives = document.querySelectorAll('#lives img');
     this._elemCoinsCount = document.getElementById('coinsValue');
 
     document.querySelector('#intro-screen button').onclick = () => {
@@ -1629,7 +1629,7 @@ class UI {
 
       ui.updateDistanceDisplay();
       ui.updateLevelCount();
-      ui.updateLifesDisplay();
+      ui.updateLivesDisplay();
       ui.updateCoinsCount();
 
       ui.hideReplay();
@@ -1666,10 +1666,10 @@ class UI {
     this._elemLevelCircle.setAttribute('stroke-dashoffset', d);
   }
 
-  updateLifesDisplay() {
-    for (let i = 0, len = this._elemsLifes.length; i < len; i += 1) {
-      const hasThisLife = i < game.lifes;
-      const elem = this._elemsLifes[i];
+  updateLivesDisplay() {
+    for (let i = 0, len = this._elemsLives.length; i < len; i += 1) {
+      const hasThisLife = i < game.lives;
+      const elem = this._elemsLives[i];
       if (hasThisLife && !elem.classList.contains('visible')) {
         elem.classList.remove('invisible');
         elem.classList.add('visible');
@@ -1711,8 +1711,8 @@ class UI {
       game.statistics.obstaclesCreated;
     document.getElementById('score-shots-fired').innerText =
       game.statistics.shotsFired;
-    document.getElementById('score-lifes-lost').innerText =
-      game.statistics.lifesLost;
+    document.getElementById('score-lives-lost').innerText =
+      game.statistics.livesLost;
   }
 
   showError(message) {
@@ -1860,8 +1860,8 @@ function createWorld() {
     doubleGunLevelDrop: 2.3,
     betterGunLevelDrop: 3.5,
 
-    maxLifes: 3,
-    pauseLifeSpawn: 400,
+    maxLives: 3,
+    pauseLivespawn: 400,
 
     levelCount: 6,
     distanceForLevelUpdate: 500,
@@ -1957,11 +1957,11 @@ function loop() {
 
       // span collectibles
       if (
-        game.lifes < world.maxLifes &&
-        game.distance - game.lastLifeSpawn > world.pauseLifeSpawn &&
+        game.lives < world.maxLives &&
+        game.distance - game.lastLivespawn > world.pauseLivespawn &&
         Math.random() < 0.01
       ) {
-        game.lastLifeSpawn = game.distance;
+        game.lastLivespawn = game.distance;
         createLifeCollectible();
       }
       if (
@@ -1995,7 +1995,7 @@ function loop() {
       game.speed += (game.targetSpeed - game.speed) * deltaTime * 0.02;
       ui.updateDistanceDisplay();
 
-      if (game.lifes <= 0 && canDie) {
+      if (game.lives <= 0 && canDie) {
         game.status = 'gameover';
       }
     }
@@ -2055,8 +2055,8 @@ function resetMap() {
     createdDoubleGun: false,
     createdBetterGun: false,
 
-    lastLifeSpawn: 0,
-    lifes: world.maxLifes,
+    lastLivespawn: 0,
+    lives: world.maxLives,
 
     level: 1,
     levelLastUpdate: 0,
@@ -2076,14 +2076,14 @@ function resetMap() {
       obstaclesDestroyed: 0,
       obstaclesCreated: 0,
       shotsFired: 0,
-      lifesLost: 0,
+      livesLost: 0,
     },
   };
 
   // update ui
   ui.updateDistanceDisplay();
   ui.updateLevelCount();
-  ui.updateLifesDisplay();
+  ui.updateLivesDisplay();
   ui.updateCoinsCount();
 
   sceneManager.clear();
