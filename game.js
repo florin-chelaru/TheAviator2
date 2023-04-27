@@ -1,5 +1,9 @@
 // Keyboard shortcuts: https://developer.stackblitz.com/guides/user-guide/keyboard-shortcuts
 // Fold all: Ctrl+K Ctrl+0
+// Partially unfold: Ctrl+K Ctrl+]
+
+const FULL_VIEW = false;
+const BASE_PATH = window.location.hostname.indexOf("stackblitz") >= 0 ? "https://cdn.jsdelivr.net/gh/florin-chelaru/TheAviator2@stackblitz/" : ""
 
 //region Airplane
 class Cabin {
@@ -246,12 +250,12 @@ class Pilot {
     this.mesh.add(body);
 
     var faceGeom = new THREE.BoxGeometry(10, 10, 10);
-    var faceMat = new THREE.MeshLambertMaterial({ color: Colors.pink });
+    var faceMat = new THREE.MeshLambertMaterial({color: Colors.pink});
     var face = new THREE.Mesh(faceGeom, faceMat);
     this.mesh.add(face);
 
     var hairGeom = new THREE.BoxGeometry(4, 4, 4);
-    var hairMat = new THREE.MeshLambertMaterial({ color: Colors.brown });
+    var hairMat = new THREE.MeshLambertMaterial({color: Colors.brown});
     var hair = new THREE.Mesh(hairGeom, hairMat);
     hair.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 2, 0));
     var hairs = new THREE.Object3D();
@@ -288,7 +292,7 @@ class Pilot {
     this.mesh.add(hairs);
 
     var glassGeom = new THREE.BoxGeometry(5, 5, 5);
-    var glassMat = new THREE.MeshLambertMaterial({ color: Colors.brown });
+    var glassMat = new THREE.MeshLambertMaterial({color: Colors.brown});
     var glassR = new THREE.Mesh(glassGeom, glassMat);
     glassR.position.set(6, 0, 3);
     var glassL = glassR.clone();
@@ -462,15 +466,16 @@ class Airplane {
 
       if (game.fpv) {
         camera.position.y = this.mesh.position.y + 20;
-        // camera.setRotationFromEuler(new THREE.Euler(-1.490248, -1.4124514, -1.48923231))
-        // camera.updateProjectionMatrix ()
+
       } else {
-        camera.fov = utils.normalize(ui.mousePos.x, -30, 1, 40, 80);
-        camera.updateProjectionMatrix();
-        camera.position.y +=
-          (this.mesh.position.y - camera.position.y) *
-          deltaTime *
-          world.cameraSensivity;
+        if (!FULL_VIEW) {
+          camera.fov = utils.normalize(ui.mousePos.x, -30, 1, 40, 80);
+          camera.updateProjectionMatrix();
+          camera.position.y +=
+            (this.mesh.position.y - camera.position.y) *
+            deltaTime *
+            world.cameraSensivity;
+        }
       }
     }
 
@@ -498,7 +503,8 @@ class Airplane {
 
 function createPlane() {
   airplane = new Airplane();
-  airplane.mesh.scale.set(0.25, 0.25, 0.25);
+  const scale = FULL_VIEW ? 0.75 : 0.25;
+  airplane.mesh.scale.set(scale, scale, scale);
   airplane.mesh.position.y = world.planeDefaultHeight;
   scene.add(airplane.mesh);
 }
@@ -557,10 +563,10 @@ class SimpleGun {
     const position = new THREE.Vector3();
     this.mesh.getWorldPosition(position);
     position.add(new THREE.Vector3(5, 0, 0));
-    spawnProjectile(this.damage(), position, direction, BULLET_SPEED, 0.3, 3);
+    createProjectile(this.damage(), position, direction, BULLET_SPEED, 0.3, 3);
 
     // Little explosion at exhaust
-    spawnParticles(
+    createParticles(
       position.clone().add(new THREE.Vector3(2, 0, 0)),
       1,
       Colors.orange,
@@ -674,10 +680,10 @@ class BetterGun {
     const position = new THREE.Vector3();
     this.mesh.getWorldPosition(position);
     position.add(new THREE.Vector3(12, 0, 0));
-    spawnProjectile(this.damage(), position, direction, BULLET_SPEED, 0.8, 6);
+    createProjectile(this.damage(), position, direction, BULLET_SPEED, 0.8, 6);
 
     // Little explosion at exhaust
-    spawnParticles(
+    createParticles(
       position.clone().add(new THREE.Vector3(2, 0, 0)),
       3,
       Colors.orange,
@@ -701,6 +707,7 @@ class BetterGun {
     });
   }
 }
+
 //endregion
 
 //region World
@@ -825,7 +832,10 @@ class Sea {
 }
 
 function createSea() {
-  // We create a second sea that is not animated because the animation of our our normal sea leaves holes at certain points and I don't know how to get rid of them. These holes did not occur in the original script that used three js version 75 and mergeVertices. However, I tried to reproduce that behaviour in the animation function but without succes - thus this workaround here.
+  // We create a second sea that is not animated because the animation of our our normal sea leaves holes at certain
+  // points and I don't know how to get rid of them. These holes did not occur in the original script that used three
+  // js version 75 and mergeVertices. However, I tried to reproduce that behaviour in the animation function but
+  // without succes - thus this workaround here.
   sea = new Sea();
   sea.mesh.position.y = -world.seaRadius;
   scene.add(sea.mesh);
@@ -840,6 +850,7 @@ function createSky() {
   sky.mesh.position.y = -world.seaRadius;
   scene.add(sky.mesh);
 }
+
 //endregion
 
 //region Collectibles
@@ -907,7 +918,7 @@ class Collectible {
   }
 
   explode() {
-    spawnParticles(this.mesh.position.clone(), 15, COLOR_COLLECTIBLE_BUBBLE, 3);
+    createParticles(this.mesh.position.clone(), 15, COLOR_COLLECTIBLE_BUBBLE, 3);
     sceneManager.remove(this);
     audioManager.play('bubble');
 
@@ -946,7 +957,7 @@ class Collectible {
   }
 }
 
-function spawnSimpleGunCollectible() {
+function createSimpleGunCollectible() {
   const gun = SimpleGun.createMesh();
   gun.scale.set(0.25, 0.25, 0.25);
   gun.position.x = -2;
@@ -956,7 +967,7 @@ function spawnSimpleGunCollectible() {
   });
 }
 
-function spawnBetterGunCollectible() {
+function createBetterGunCollectible() {
   const gun = BetterGun.createMesh();
   gun.scale.set(0.25, 0.25, 0.25);
   gun.position.x = -7;
@@ -966,7 +977,7 @@ function spawnBetterGunCollectible() {
   });
 }
 
-function spawnDoubleGunCollectible() {
+function createDoubleGunCollectible() {
   const guns = new THREE.Group();
 
   const gun1 = SimpleGun.createMesh();
@@ -986,7 +997,7 @@ function spawnDoubleGunCollectible() {
   });
 }
 
-function spawnLifeCollectible() {
+function createLifeCollectible() {
   const heart = modelManager.get('heart').clone();
   heart.traverse(function (child) {
     if (child instanceof THREE.Mesh) {
@@ -1000,6 +1011,7 @@ function spawnLifeCollectible() {
     addLife();
   });
 }
+
 //endregion
 
 //region Enemies
@@ -1043,7 +1055,7 @@ class Enemy {
     for (const projectile of allProjectiles) {
       const projectileAabb = new THREE.Box3().setFromObject(projectile.mesh);
       if (thisAabb.intersectsBox(projectileAabb)) {
-        spawnParticles(
+        createParticles(
           projectile.mesh.position.clone(),
           5,
           Colors.brownDark,
@@ -1051,7 +1063,7 @@ class Enemy {
         );
         projectile.remove();
         this.hitpoints -= projectile.damage;
-        audioManager.play('bullet-impact', { volume: 0.3 });
+        audioManager.play('bullet-impact', {volume: 0.3});
       }
     }
     if (this.hitpoints <= 0) {
@@ -1060,16 +1072,18 @@ class Enemy {
   }
 
   explode() {
-    audioManager.play('rock-shatter', { volume: 3 });
-    spawnParticles(this.mesh.position.clone(), 15, Colors.red, 3);
+    audioManager.play('rock-shatter', {volume: 3});
+    createParticles(this.mesh.position.clone(), 15, Colors.red, 3);
     sceneManager.remove(this);
     game.statistics.enemiesKilled += 1;
   }
 }
 
-function spawnEnemies(count) {
+function createEnemies(count) {
   for (let i = 0; i < count; i++) {
     const enemy = new Enemy();
+    const scale = FULL_VIEW ? 2 : 1;
+    enemy.mesh.scale.set(scale, scale, scale);
     enemy.angle = -(i * 0.1);
     enemy.distance =
       world.seaRadius +
@@ -1079,8 +1093,9 @@ function spawnEnemies(count) {
     enemy.mesh.position.y =
       -world.seaRadius + Math.sin(enemy.angle) * enemy.distance;
   }
-  game.statistics.enemiesSpawned += count;
+  game.statistics.enemiesCreated += count;
 }
+
 //endregion
 
 //region Coins
@@ -1108,9 +1123,9 @@ class Coin {
 
     // collision?
     if (utils.collide(airplane.mesh, this.mesh, world.coinDistanceTolerance)) {
-      spawnParticles(this.mesh.position.clone(), 5, COLOR_COINS, 0.8);
+      createParticles(this.mesh.position.clone(), 5, COLOR_COINS, 0.8);
       addCoin();
-      audioManager.play('coin', { volume: 0.5 });
+      audioManager.play('coin', {volume: 0.5});
       sceneManager.remove(this);
     }
     // passed-by?
@@ -1120,7 +1135,7 @@ class Coin {
   }
 }
 
-function spawnCoins() {
+function createCoins() {
   const nCoins = 1 + Math.floor(Math.random() * 10);
   const d =
     world.seaRadius +
@@ -1135,8 +1150,9 @@ function spawnCoins() {
       -world.seaRadius + Math.sin(coin.angle) * coin.distance;
     coin.mesh.position.x = Math.cos(coin.angle) * coin.distance;
   }
-  game.statistics.coinsSpawned += nCoins;
+  game.statistics.coinsCreated += nCoins;
 }
+
 //endregion
 
 //region Shooting
@@ -1149,7 +1165,7 @@ class Projectile {
     this.damage = damage;
     this.mesh = new THREE.Mesh(
       new THREE.CylinderGeometry(radius, radius, length),
-      new THREE.LineBasicMaterial({ color: PROJECTILE_COLOR })
+      new THREE.LineBasicMaterial({color: PROJECTILE_COLOR})
     );
     this.mesh.position.copy(initialPosition);
     this.mesh.rotation.z = Math.PI / 2;
@@ -1178,7 +1194,7 @@ class Projectile {
   }
 }
 
-function spawnProjectile(
+function createProjectile(
   damage,
   initialPosition,
   direction,
@@ -1190,6 +1206,7 @@ function spawnProjectile(
     new Projectile(damage, initialPosition, direction, speed, radius, length)
   );
 }
+
 //endregion
 
 //region Lives and score
@@ -1211,6 +1228,7 @@ function removeLife() {
 
   game.statistics.lifesLost += 1;
 }
+
 //endregion
 
 //region Game managers
@@ -1268,8 +1286,6 @@ const loadingProgressManager = new LoadingProgressManager();
 
 class AudioManager {
   constructor() {
-    this.basePath =
-      'https://cdn.jsdelivr.net/gh/florin-chelaru/TheAviator2@master/';
     this.buffers = {};
     this.loader = new THREE.AudioLoader();
     this.listener = new THREE.AudioListener();
@@ -1283,7 +1299,7 @@ class AudioManager {
   load(soundId, category, path) {
     const promise = new Promise((resolve, reject) => {
       this.loader.load(
-        this.basePath + path,
+        BASE_PATH + path,
         (audioBuffer) => {
           this.buffers[soundId] = audioBuffer;
           if (category !== null) {
@@ -1294,7 +1310,8 @@ class AudioManager {
           }
           resolve();
         },
-        () => {},
+        () => {
+        },
         reject
       );
     });
@@ -1327,8 +1344,6 @@ const audioManager = new AudioManager();
 
 class ModelManager {
   constructor(path) {
-    this.basePath =
-      'https://cdn.jsdelivr.net/gh/florin-chelaru/TheAviator2@master/';
     this.path = path;
     this.models = {};
   }
@@ -1337,12 +1352,13 @@ class ModelManager {
     const promise = new Promise((resolve, reject) => {
       const loader = new THREE.OBJLoader();
       loader.load(
-        this.basePath + this.path + '/' + modelName + '.obj',
+        BASE_PATH + this.path + '/' + modelName + '.obj',
         (obj) => {
           this.models[modelName] = obj;
           resolve();
         },
-        function () {},
+        function () {
+        },
         reject
       );
     });
@@ -1401,9 +1417,20 @@ var MAX_WORLD_X = 1000;
 //INIT THREE JS, SCREEN AND MOUSE EVENTS
 function createScene() {
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(50, ui.width / ui.height, 0.1, 10000);
+  if (!FULL_VIEW) {
+    camera = new THREE.PerspectiveCamera(50, ui.width / ui.height, 0.1, 10000);
+    scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
+  } else {
+    camera = new THREE.OrthographicCamera(
+      ui.width / -1.5,
+      ui.width / 1.5,
+      ui.height / 1.5,
+      ui.height / -1.5,
+      1,
+      1000
+    );
+  }
   audioManager.setCamera(camera);
-  scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
 
   renderer = new THREE.WebGLRenderer({
     canvas: ui.canvas,
@@ -1438,12 +1465,9 @@ function createScene() {
   // controls.minPolarAngle = -Math.PI / 2
   // controls.maxPolarAngle = Math.PI
   // controls.addEventListener('change', () => {
-  // 	console.log('camera changed', 'camera=', camera.position, ', airplane=', airplane.position, 'camera.rotation=', camera.rotation)
-  // })
-  // setTimeout(() => {
-  // 	camera.lookAt(airplane.mesh.position)
-  // 	controls.target.copy(airplane.mesh.position)
-  // }, 100)
+  // 	console.log('camera changed', 'camera=', camera.position, ', airplane=', airplane.position, 'camera.rotation=',
+  // camera.rotation) }) setTimeout(() => { camera.lookAt(airplane.mesh.position)
+  // controls.target.copy(airplane.mesh.position) }, 100)
 
   // controls.noZoom = true
   //controls.noPan = true
@@ -1528,7 +1552,7 @@ class UI {
 
     this.width = window.innerWidth;
     this.height = window.innerHeight;
-    this.mousePos = { x: 0, y: 0 };
+    this.mousePos = {x: 0, y: 0};
     this.canvas = document.getElementById('threejs-canvas');
 
     this.mouseButtons = [false, false, false];
@@ -1553,14 +1577,14 @@ class UI {
   handleMouseMove(event) {
     var tx = -1 + (event.clientX / this.width) * 2;
     var ty = 1 - (event.clientY / this.height) * 2;
-    this.mousePos = { x: tx, y: ty };
+    this.mousePos = {x: tx, y: ty};
   }
 
   handleTouchMove(event) {
     event.preventDefault();
     var tx = -1 + (event.touches[0].pageX / this.width) * 2;
     var ty = 1 - (event.touches[0].pageY / this.height) * 2;
-    this.mousePos = { x: tx, y: ty };
+    this.mousePos = {x: tx, y: ty};
   }
 
   handleMouseDown(event) {
@@ -1638,7 +1662,7 @@ class UI {
       502 *
       (1 -
         (game.distance % world.distanceForLevelUpdate) /
-          world.distanceForLevelUpdate);
+        world.distanceForLevelUpdate);
     this._elemLevelCircle.setAttribute('stroke-dashoffset', d);
   }
 
@@ -1680,11 +1704,11 @@ class UI {
     document.getElementById('score-coins-collected').innerText =
       game.statistics.coinsCollected;
     document.getElementById('score-coins-total').innerText =
-      game.statistics.coinsSpawned;
+      game.statistics.coinsCreated;
     document.getElementById('score-enemies-killed').innerText =
       game.statistics.enemiesKilled;
     document.getElementById('score-enemies-total').innerText =
-      game.statistics.enemiesSpawned;
+      game.statistics.enemiesCreated;
     document.getElementById('score-shots-fired').innerText =
       game.statistics.shotsFired;
     document.getElementById('score-lifes-lost').innerText =
@@ -1761,7 +1785,7 @@ const utils = {
   },
 };
 
-function spawnParticles(pos, count, color, scale) {
+function createParticles(pos, count, color, scale) {
   for (let i = 0; i < count; i++) {
     const geom = new THREE.TetrahedronGeometry(3, 0);
     const mat = new THREE.MeshPhongMaterial({
@@ -1786,7 +1810,7 @@ function spawnParticles(pos, count, color, scale) {
       x: Math.random() * 12,
       y: Math.random() * 12,
     });
-    TweenMax.to(mesh.scale, speed, { x: 0.1, y: 0.1, z: 0.1 });
+    TweenMax.to(mesh.scale, speed, {x: 0.1, y: 0.1, z: 0.1});
     TweenMax.to(mesh.position, speed, {
       x: targetX,
       y: targetY,
@@ -1802,7 +1826,11 @@ function spawnParticles(pos, count, color, scale) {
 
 function setSideView() {
   game.fpv = false;
-  camera.position.set(0, world.planeDefaultHeight, 200);
+  if (!FULL_VIEW) {
+    camera.position.set(0, world.planeDefaultHeight, 200);
+  } else {
+    camera.position.set(0, world.planeDefaultHeight - 500, 1000);
+  }
   camera.setRotationFromEuler(new THREE.Euler(0, 0, 0));
 }
 
@@ -1858,14 +1886,14 @@ function createWorld() {
 
     coinDistanceTolerance: 15,
     coinsSpeed: 0.5,
-    distanceForCoinsSpawn: 50,
+    distanceForCoinsCreation: 50,
 
     collectibleDistanceTolerance: 15,
     collectiblesSpeed: 0.6,
 
     enemyDistanceTolerance: 10,
     enemiesSpeed: 0.6,
-    distanceForEnemiesSpawn: 50,
+    distanceForEnemiesCreated: 50,
   };
 
   // create the world
@@ -1887,11 +1915,11 @@ function loop() {
     if (!game.paused) {
       // Add coins
       if (
-        Math.floor(game.distance) % world.distanceForCoinsSpawn === 0 &&
-        Math.floor(game.distance) > game.coinLastSpawn
+        Math.floor(game.distance) % world.distanceForCoinsCreation === 0 &&
+        Math.floor(game.distance) > game.coinLastCreated
       ) {
-        game.coinLastSpawn = Math.floor(game.distance);
-        spawnCoins();
+        game.coinLastCreated = Math.floor(game.distance);
+        createCoins();
       }
       if (
         Math.floor(game.distance) % world.distanceForSpeedUpdate === 0 &&
@@ -1901,11 +1929,11 @@ function loop() {
         game.targetSpeed += world.incrementSpeedByTime * deltaTime;
       }
       if (
-        Math.floor(game.distance) % world.distanceForEnemiesSpawn === 0 &&
-        Math.floor(game.distance) > game.enemyLastSpawn
+        Math.floor(game.distance) % world.distanceForEnemiesCreated === 0 &&
+        Math.floor(game.distance) > game.enemyLastCreated
       ) {
-        game.enemyLastSpawn = Math.floor(game.distance);
-        spawnEnemies(game.level);
+        game.enemyLastCreated = Math.floor(game.distance);
+        createEnemies(game.level);
       }
       if (
         Math.floor(game.distance) % world.distanceForLevelUpdate === 0 &&
@@ -1934,28 +1962,28 @@ function loop() {
         Math.random() < 0.01
       ) {
         game.lastLifeSpawn = game.distance;
-        spawnLifeCollectible();
+        createLifeCollectible();
       }
       if (
-        !game.spawnedSimpleGun &&
+        !game.createdSimpleGun &&
         game.distance > world.simpleGunLevelDrop * world.distanceForLevelUpdate
       ) {
-        spawnSimpleGunCollectible();
-        game.spawnedSimpleGun = true;
+        createSimpleGunCollectible();
+        game.createdSimpleGun = true;
       }
       if (
-        !game.spawnedDoubleGun &&
+        !game.createdDoubleGun &&
         game.distance > world.doubleGunLevelDrop * world.distanceForLevelUpdate
       ) {
-        spawnDoubleGunCollectible();
-        game.spawnedDoubleGun = true;
+        createDoubleGunCollectible();
+        game.createdDoubleGun = true;
       }
       if (
-        !game.spawnedBetterGun &&
+        !game.createdBetterGun &&
         game.distance > world.betterGunLevelDrop * world.distanceForLevelUpdate
       ) {
-        spawnBetterGunCollectible();
-        game.spawnedBetterGun = true;
+        createBetterGunCollectible();
+        game.createdBetterGun = true;
       }
 
       if (ui.mouseButtons[0] || ui.keysDown['Space']) {
@@ -2022,10 +2050,10 @@ function resetMap() {
     coins: 0,
     fpv: false,
 
-    // gun spawning
-    spawnedSimpleGun: false,
-    spawnedDoubleGun: false,
-    spawnedBetterGun: false,
+    // gun creation
+    createdSimpleGun: false,
+    createdDoubleGun: false,
+    createdBetterGun: false,
 
     lastLifeSpawn: 0,
     lifes: world.maxLifes,
@@ -2039,14 +2067,14 @@ function resetMap() {
     planeCollisionDisplacementY: 0,
     planeCollisionSpeedY: 0,
 
-    coinLastSpawn: 0,
-    enemyLastSpawn: 0,
+    coinLastCreated: 0,
+    enemyLastCreated: 0,
 
     statistics: {
       coinsCollected: 0,
-      coinsSpawned: 0,
+      coinsCreated: 0,
       enemiesKilled: 0,
-      enemiesSpawned: 0,
+      enemiesCreated: 0,
       shotsFired: 0,
       lifesLost: 0,
     },
@@ -2076,8 +2104,8 @@ let soundPlaying = false;
 
 function startMap() {
   if (!soundPlaying) {
-    audioManager.play('propeller', { loop: true, volume: 1 });
-    audioManager.play('ocean', { loop: true, volume: 1 });
+    audioManager.play('propeller', {loop: true, volume: 1});
+    audioManager.play('ocean', {loop: true, volume: 1});
     soundPlaying = true;
   }
 
