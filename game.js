@@ -1483,6 +1483,7 @@ function rotateAroundSea(object, deltaTime, _speed) {
 
 //endregion
 
+//region Game
 class UI {
   constructor(onStart) {
     this._elemDistanceCounter = document.getElementById('distValue');
@@ -2150,3 +2151,4 @@ function onWebsiteLoaded(_event) {
 }
 
 window.addEventListener('load', onWebsiteLoaded, false);
+//endregion
