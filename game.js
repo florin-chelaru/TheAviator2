@@ -1014,8 +1014,8 @@ function createLifeCollectible() {
 
 //endregion
 
-//region Enemies
-class Enemy {
+//region Obstacles
+class Obstacle {
   constructor() {
     var geom = new THREE.TetrahedronGeometry(8, 2);
     var mat = new THREE.MeshPhongMaterial({
@@ -1033,13 +1033,13 @@ class Enemy {
   }
 
   tick(deltaTime) {
-    rotateAroundSea(this, deltaTime, world.enemiesSpeed);
+    rotateAroundSea(this, deltaTime, world.obstaclesSpeed);
     this.mesh.rotation.y += Math.random() * 0.1;
     this.mesh.rotation.z += Math.random() * 0.1;
 
     // collision?
     if (
-      utils.collide(airplane.mesh, this.mesh, world.enemyDistanceTolerance) &&
+      utils.collide(airplane.mesh, this.mesh, world.obstacleDistanceTolerance) &&
       game.status !== 'finished'
     ) {
       this.explode();
@@ -1075,25 +1075,25 @@ class Enemy {
     audioManager.play('rock-shatter', {volume: 3});
     createParticles(this.mesh.position.clone(), 15, Colors.red, 3);
     sceneManager.remove(this);
-    game.statistics.enemiesKilled += 1;
+    game.statistics.obstaclesDestroyed += 1;
   }
 }
 
-function createEnemies(count) {
+function createObstacles(count) {
   for (let i = 0; i < count; i++) {
-    const enemy = new Enemy();
+    const obstacle = new Obstacle();
     const scale = FULL_VIEW ? 2 : 1;
-    enemy.mesh.scale.set(scale, scale, scale);
-    enemy.angle = -(i * 0.1);
-    enemy.distance =
+    obstacle.mesh.scale.set(scale, scale, scale);
+    obstacle.angle = -(i * 0.1);
+    obstacle.distance =
       world.seaRadius +
       world.planeDefaultHeight +
       (-1 + Math.random() * 2) * (world.planeAmpHeight - 20);
-    enemy.mesh.position.x = Math.cos(enemy.angle) * enemy.distance;
-    enemy.mesh.position.y =
-      -world.seaRadius + Math.sin(enemy.angle) * enemy.distance;
+    obstacle.mesh.position.x = Math.cos(obstacle.angle) * obstacle.distance;
+    obstacle.mesh.position.y =
+      -world.seaRadius + Math.sin(obstacle.angle) * obstacle.distance;
   }
-  game.statistics.enemiesCreated += count;
+  game.statistics.obstaclesCreated += count;
 }
 
 //endregion
@@ -1705,10 +1705,10 @@ class UI {
       game.statistics.coinsCollected;
     document.getElementById('score-coins-total').innerText =
       game.statistics.coinsCreated;
-    document.getElementById('score-enemies-killed').innerText =
-      game.statistics.enemiesKilled;
-    document.getElementById('score-enemies-total').innerText =
-      game.statistics.enemiesCreated;
+    document.getElementById('score-obstacles-destroyed').innerText =
+      game.statistics.obstaclesDestroyed;
+    document.getElementById('score-obstacles-total').innerText =
+      game.statistics.obstaclesCreated;
     document.getElementById('score-shots-fired').innerText =
       game.statistics.shotsFired;
     document.getElementById('score-lifes-lost').innerText =
@@ -1891,9 +1891,9 @@ function createWorld() {
     collectibleDistanceTolerance: 15,
     collectiblesSpeed: 0.6,
 
-    enemyDistanceTolerance: 10,
-    enemiesSpeed: 0.6,
-    distanceForEnemiesCreated: 50,
+    obstacleDistanceTolerance: 10,
+    obstaclesSpeed: 0.6,
+    distanceForObstaclesCreated: 50,
   };
 
   // create the world
@@ -1929,11 +1929,11 @@ function loop() {
         game.targetSpeed += world.incrementSpeedByTime * deltaTime;
       }
       if (
-        Math.floor(game.distance) % world.distanceForEnemiesCreated === 0 &&
-        Math.floor(game.distance) > game.enemyLastCreated
+        Math.floor(game.distance) % world.distanceForObstaclesCreated === 0 &&
+        Math.floor(game.distance) > game.obstacleLastCreated
       ) {
-        game.enemyLastCreated = Math.floor(game.distance);
-        createEnemies(game.level);
+        game.obstacleLastCreated = Math.floor(game.distance);
+        createObstacles(game.level);
       }
       if (
         Math.floor(game.distance) % world.distanceForLevelUpdate === 0 &&
@@ -2068,13 +2068,13 @@ function resetMap() {
     planeCollisionSpeedY: 0,
 
     coinLastCreated: 0,
-    enemyLastCreated: 0,
+    obstacleLastCreated: 0,
 
     statistics: {
       coinsCollected: 0,
       coinsCreated: 0,
-      enemiesKilled: 0,
-      enemiesCreated: 0,
+      obstaclesDestroyed: 0,
+      obstaclesCreated: 0,
       shotsFired: 0,
       lifesLost: 0,
     },
