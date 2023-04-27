@@ -1861,7 +1861,7 @@ function createWorld() {
     betterGunLevelDrop: 3.5,
 
     maxLives: 3,
-    pauseLivespawn: 400,
+    distanceBetweenLives: 400,
 
     levelCount: 6,
     distanceForLevelUpdate: 500,
@@ -1955,13 +1955,13 @@ function loop() {
         }
       }
 
-      // span collectibles
+      // create collectibles
       if (
         game.lives < world.maxLives &&
-        game.distance - game.lastLivespawn > world.pauseLivespawn &&
+        game.distance - game.lastLifeCreated > world.distanceBetweenLives &&
         Math.random() < 0.01
       ) {
-        game.lastLivespawn = game.distance;
+        game.lastLifeCreated = game.distance;
         createLifeCollectible();
       }
       if (
@@ -2055,7 +2055,7 @@ function resetMap() {
     createdDoubleGun: false,
     createdBetterGun: false,
 
-    lastLivespawn: 0,
+    lastLifeCreated: 0,
     lives: world.maxLives,
 
     level: 1,
