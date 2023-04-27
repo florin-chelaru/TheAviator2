@@ -1,3 +1,6 @@
+// Keyboard shortcuts: https://developer.stackblitz.com/guides/user-guide/keyboard-shortcuts
+// Fold all: Ctrl+K Ctrl+0
+
 //region Airplane
 class Cabin {
   mesh;
