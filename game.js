@@ -2114,8 +2114,8 @@ let soundPlaying = false;
 
 function startMap() {
   if (!soundPlaying) {
-    audioManager.play('propeller', { loop: true, volume: 1 });
-    audioManager.play('ocean', { loop: true, volume: 1 });
+    // audioManager.play('propeller', { loop: true, volume: 1 });
+    // audioManager.play('ocean', { loop: true, volume: 1 });
     soundPlaying = true;
   }
 
@@ -2128,8 +2128,8 @@ function startMap() {
 
 function onWebsiteLoaded(_event) {
   // load audio
-  audioManager.load('ocean', null, '/audio/ocean.mp3');
-  audioManager.load('propeller', null, '/audio/propeller.mp3');
+  // audioManager.load('ocean', null, '/audio/ocean.mp3');
+  // audioManager.load('propeller', null, '/audio/propeller.mp3');
 
   audioManager.load('coin-1', 'coin', '/audio/coin-1.mp3');
   audioManager.load('coin-2', 'coin', '/audio/coin-2.mp3');
