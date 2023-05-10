@@ -1343,9 +1343,10 @@ class AudioManager {
     if (options.loop) {
       sound.setLoop(true);
     }
-    if (options.volume) {
-      sound.setVolume(options.volume);
-    }
+    sound.setVolume(0.1);
+    // if (options.volume) {
+    //   sound.setVolume(options.volume);
+    // }
     sound.play();
   }
 }
