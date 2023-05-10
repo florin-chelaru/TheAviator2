@@ -3,7 +3,10 @@
 // Partially unfold: Ctrl+K Ctrl+]
 
 const FULL_VIEW = false;
-const BASE_PATH = window.location.hostname.indexOf("stackblitz") >= 0 ? "https://cdn.jsdelivr.net/gh/florin-chelaru/TheAviator2@stackblitz/" : ""
+const BASE_PATH =
+  window.location.hostname.indexOf('stackblitz') >= 0
+    ? 'https://cdn.jsdelivr.net/gh/florin-chelaru/TheAviator2@stackblitz/'
+    : '';
 
 //region Airplane
 class Cabin {
@@ -250,12 +253,12 @@ class Pilot {
     this.mesh.add(body);
 
     var faceGeom = new THREE.BoxGeometry(10, 10, 10);
-    var faceMat = new THREE.MeshLambertMaterial({color: Colors.pink});
+    var faceMat = new THREE.MeshLambertMaterial({ color: Colors.pink });
     var face = new THREE.Mesh(faceGeom, faceMat);
     this.mesh.add(face);
 
     var hairGeom = new THREE.BoxGeometry(4, 4, 4);
-    var hairMat = new THREE.MeshLambertMaterial({color: Colors.brown});
+    var hairMat = new THREE.MeshLambertMaterial({ color: Colors.brown });
     var hair = new THREE.Mesh(hairGeom, hairMat);
     hair.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 2, 0));
     var hairs = new THREE.Object3D();
@@ -292,7 +295,7 @@ class Pilot {
     this.mesh.add(hairs);
 
     var glassGeom = new THREE.BoxGeometry(5, 5, 5);
-    var glassMat = new THREE.MeshLambertMaterial({color: Colors.brown});
+    var glassMat = new THREE.MeshLambertMaterial({ color: Colors.brown });
     var glassR = new THREE.Mesh(glassGeom, glassMat);
     glassR.position.set(6, 0, 3);
     var glassL = glassR.clone();
@@ -466,7 +469,6 @@ class Airplane {
 
       if (game.fpv) {
         camera.position.y = this.mesh.position.y + 20;
-
       } else {
         if (!FULL_VIEW) {
           camera.fov = utils.normalize(ui.mousePos.x, -30, 1, 40, 80);
@@ -918,7 +920,12 @@ class Collectible {
   }
 
   explode() {
-    createParticles(this.mesh.position.clone(), 15, COLOR_COLLECTIBLE_BUBBLE, 3);
+    createParticles(
+      this.mesh.position.clone(),
+      15,
+      COLOR_COLLECTIBLE_BUBBLE,
+      3
+    );
     sceneManager.remove(this);
     audioManager.play('bubble');
 
@@ -1039,7 +1046,11 @@ class Obstacle {
 
     // collision?
     if (
-      utils.collide(airplane.mesh, this.mesh, world.obstacleDistanceTolerance) &&
+      utils.collide(
+        airplane.mesh,
+        this.mesh,
+        world.obstacleDistanceTolerance
+      ) &&
       game.status !== 'finished'
     ) {
       this.explode();
@@ -1063,7 +1074,7 @@ class Obstacle {
         );
         projectile.remove();
         this.hitpoints -= projectile.damage;
-        audioManager.play('bullet-impact', {volume: 0.3});
+        audioManager.play('bullet-impact', { volume: 0.3 });
       }
     }
     if (this.hitpoints <= 0) {
@@ -1072,7 +1083,7 @@ class Obstacle {
   }
 
   explode() {
-    audioManager.play('rock-shatter', {volume: 3});
+    audioManager.play('rock-shatter', { volume: 3 });
     createParticles(this.mesh.position.clone(), 15, Colors.red, 3);
     sceneManager.remove(this);
     game.statistics.obstaclesDestroyed += 1;
@@ -1125,7 +1136,7 @@ class Coin {
     if (utils.collide(airplane.mesh, this.mesh, world.coinDistanceTolerance)) {
       createParticles(this.mesh.position.clone(), 5, COLOR_COINS, 0.8);
       addCoin();
-      audioManager.play('coin', {volume: 0.5});
+      audioManager.play('coin', { volume: 0.5 });
       sceneManager.remove(this);
     }
     // passed-by?
@@ -1165,7 +1176,7 @@ class Projectile {
     this.damage = damage;
     this.mesh = new THREE.Mesh(
       new THREE.CylinderGeometry(radius, radius, length),
-      new THREE.LineBasicMaterial({color: PROJECTILE_COLOR})
+      new THREE.LineBasicMaterial({ color: PROJECTILE_COLOR })
     );
     this.mesh.position.copy(initialPosition);
     this.mesh.rotation.z = Math.PI / 2;
@@ -1310,8 +1321,7 @@ class AudioManager {
           }
           resolve();
         },
-        () => {
-        },
+        () => {},
         reject
       );
     });
@@ -1357,8 +1367,7 @@ class ModelManager {
           this.models[modelName] = obj;
           resolve();
         },
-        function () {
-        },
+        function () {},
         reject
       );
     });
@@ -1552,7 +1561,7 @@ class UI {
 
     this.width = window.innerWidth;
     this.height = window.innerHeight;
-    this.mousePos = {x: 0, y: 0};
+    this.mousePos = { x: 0, y: 0 };
     this.canvas = document.getElementById('threejs-canvas');
 
     this.mouseButtons = [false, false, false];
@@ -1577,14 +1586,14 @@ class UI {
   handleMouseMove(event) {
     var tx = -1 + (event.clientX / this.width) * 2;
     var ty = 1 - (event.clientY / this.height) * 2;
-    this.mousePos = {x: tx, y: ty};
+    this.mousePos = { x: tx, y: ty };
   }
 
   handleTouchMove(event) {
     event.preventDefault();
     var tx = -1 + (event.touches[0].pageX / this.width) * 2;
     var ty = 1 - (event.touches[0].pageY / this.height) * 2;
-    this.mousePos = {x: tx, y: ty};
+    this.mousePos = { x: tx, y: ty };
   }
 
   handleMouseDown(event) {
@@ -1662,7 +1671,7 @@ class UI {
       502 *
       (1 -
         (game.distance % world.distanceForLevelUpdate) /
-        world.distanceForLevelUpdate);
+          world.distanceForLevelUpdate);
     this._elemLevelCircle.setAttribute('stroke-dashoffset', d);
   }
 
@@ -1674,6 +1683,7 @@ class UI {
         elem.classList.remove('invisible');
         elem.classList.add('visible');
       } else if (!hasThisLife && !elem.classList.contains('invisible')) {
+        console.log('remove life');
         elem.classList.remove('visible');
         elem.classList.add('invisible');
       }
@@ -1810,7 +1820,7 @@ function createParticles(pos, count, color, scale) {
       x: Math.random() * 12,
       y: Math.random() * 12,
     });
-    TweenMax.to(mesh.scale, speed, {x: 0.1, y: 0.1, z: 0.1});
+    TweenMax.to(mesh.scale, speed, { x: 0.1, y: 0.1, z: 0.1 });
     TweenMax.to(mesh.position, speed, {
       x: targetX,
       y: targetY,
@@ -2104,8 +2114,8 @@ let soundPlaying = false;
 
 function startMap() {
   if (!soundPlaying) {
-    audioManager.play('propeller', {loop: true, volume: 1});
-    audioManager.play('ocean', {loop: true, volume: 1});
+    audioManager.play('propeller', { loop: true, volume: 1 });
+    audioManager.play('ocean', { loop: true, volume: 1 });
     soundPlaying = true;
   }
 
