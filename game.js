@@ -675,6 +675,8 @@ class BetterGun {
 
   shoot(direction) {
     const BULLET_SPEED = 0.5;
+    const BULLET_RADIUS = 0.8;
+    const BULLET_LENGTH = 6;
     const RECOIL_DISTANCE = 4;
     const RECOIL_DURATION = this.downtime() / 3;
 
@@ -682,7 +684,14 @@ class BetterGun {
     const position = new THREE.Vector3();
     this.mesh.getWorldPosition(position);
     position.add(new THREE.Vector3(12, 0, 0));
-    createProjectile(this.damage(), position, direction, BULLET_SPEED, 0.8, 6);
+    createProjectile(
+      this.damage(),
+      position,
+      direction,
+      BULLET_SPEED,
+      BULLET_RADIUS,
+      BULLET_LENGTH
+    );
 
     // Little explosion at exhaust
     createParticles(
